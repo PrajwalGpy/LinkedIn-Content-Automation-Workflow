@@ -2,8 +2,8 @@
 
 Transform your LinkedIn content creation from a 2+ hour manual process to a 2-minute automated workflow! This RAG-powered system handles everything from research to graphics generation, delivering professional-quality posts with minimal effort.
 
-![Workflow Demo Placeholder]()
-*Complete Content Creation Pipeline*
+![Workflow Demo Placeholder](https://github.com/PrajwalGpy/LinkedIn-Content-Automation-Workflow/blob/main/Screenshot%202025-06-20%20213542.png)
+
 
 ---
 
