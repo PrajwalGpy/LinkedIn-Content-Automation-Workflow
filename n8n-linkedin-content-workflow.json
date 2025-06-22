@@ -1,0 +1,327 @@
+{
+  "name": "Linkedin Content ganarate workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -40
+      ],
+      "id": "5a36e986-6728-4d33-b56b-aee1b5496d35",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Result 1 : {{ $json.results[0].title }}{{ $json.results[0].url }}{{ $json.results[0].content }}\nResult 2 : {{ $json.results[1].title }}{{ $json.results[1].url }}{{ $json.results[1].content }}\nResult 3 : {{ $json.results[2].title }}{{ $json.results[2].url }}{{ $json.results[2].content }}",
+        "options": {
+          "systemMessage": "=You are a LinkedIn content strategist with expertise in personal branding and thought leadership.\n\nI will provide you with text from three different web sources related to a specific topic. Your task is to:\n\nAnalyze all three sources and extract the most relevant insights.\n\nSynthesize the ideas into a single, cohesive, and original LinkedIn post (not just a summary).\n\nWrite in a confident, conversational tone suited for a professional LinkedIn audience.\n\nStructure the post with:\n\nA strong hook to grab attention within the first 2 lines.\n\nClear and engaging transitions between points.\n\nOptional use of emojis, bullets, or short paragraphs to enhance readability.\n\nA thoughtful call to action (ask a question or invite discussion in the comments).\n\nOutput Format: A ready-to-publish LinkedIn post (max 2500 characters).\n\nNow, here are the three sources:\n1️⃣ [Insert Web Result 1]\n2️⃣ [Insert Web Result 2]\n3️⃣ [Insert Web Result 3]\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        300,
+        -40
+      ],
+      "id": "33b91951-8671-4eec-a60e-21f03c444716",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        120
+      ],
+      "id": "7168793f-489d-4ac9-8187-e8d38a23d467",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "H0yv4hwQEtHcn8Nw",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"search web to {{ $json.topic }}\",\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 3,\n  \"time_range\": null,\n  \"days\": 7,\n  \"include_answer\": true,\n  \"include_raw_content\": true,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_domains\": [],\n  \"exclude_domains\": [],\n  \"country\": null\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        -40
+      ],
+      "id": "452d2715-af4f-4659-9f26-7399d8714bdb",
+      "name": "tavily"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs",
+          "mode": "list",
+          "cachedResultName": "linkedin content ganarator",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "topic": "={{ $('Get Row(s)').item.json.topic }}",
+            "status": "Created",
+            "content": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "topic"
+          ],
+          "schema": [
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        660,
+        -40
+      ],
+      "id": "f6b47266-2a06-49d8-870b-8a30961e55e3",
+      "name": "Update Row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VeVUMD2dfE0go0IH",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs",
+          "mode": "list",
+          "cachedResultName": "linkedin content ganarator",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Cb8xZGYNcRmue0py7BYY_n2PlL7lSWskrp_ubxiunhs/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "To do"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -160,
+        -40
+      ],
+      "id": "175fafca-e61a-4465-b594-c91da6de99d6",
+      "name": "Get Row(s)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VeVUMD2dfE0go0IH",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn Content Creator Workflow ",
+        "height": 80,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        40,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "ea15d0fd-94cf-417d-900c-5344a14ad815",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 19,
+              "triggerAtMinute": 13
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -440,
+        200
+      ],
+      "id": "8f8023c3-7fb4-45d2-8d96-80e0ba21fd2a",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tavily": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Row(s)": {
+      "main": [
+        [
+          {
+            "node": "tavily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3ee285cc-5352-4e68-b1f7-c7c8d1737e13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d674cf8f77a81e3eb082a61ecd6aba6031ec8b743173bd02fada9d2dde9b54d"
+  },
+  "id": "t4i9hCaqhfZAiv4k",
+  "tags": []
+}
